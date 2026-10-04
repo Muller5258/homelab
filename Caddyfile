@@ -1,0 +1,11 @@
+http://kuma.192.168.10.232.nip.io {
+    reverse_proxy uptime-kuma:3001
+}
+
+http://portainer.192.168.10.232.nip.io {
+    reverse_proxy portainer:9000
+}
+
+http://cloud.192.168.10.232.nip.io {
+    reverse_proxy nextcloud:80
+}

@@ -1,0 +1,63 @@
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    networks: [proxy]
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    restart: unless-stopped
+    volumes:
+      - uptime-kuma:/app/data
+    networks: [proxy]
+
+  portainer:
+    image: portainer/portainer-ce:lts
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks: [proxy]
+
+  nextcloud:
+    image: nextcloud:apache
+    restart: unless-stopped
+    depends_on: [db]
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      NEXTCLOUD_TRUSTED_DOMAINS: cloud.${SERVER_IP}.nip.io
+      TRUSTED_PROXIES: 172.16.0.0/12
+    volumes:
+      - nextcloud_data:/var/www/html
+    networks: [proxy, backend]
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks: [backend]
+
+networks:
+  proxy:
+  backend:
+
+volumes:
+  caddy_data:
+  portainer_data:
+  nextcloud_data:
+  db_data:
+  uptime-kuma:
+    external: true
