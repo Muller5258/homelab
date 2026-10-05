@@ -50,14 +50,42 @@ services:
       - db_data:/var/lib/postgresql/data
     networks: [backend]
 
+  # ---- new in stage 3 ----
+  visit-counter:
+    image: ghcr.io/muller5258/visit-counter:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://app:${APP_DB_PASSWORD}@app-db:5432/app
+    depends_on:
+      app-db:
+        condition: service_healthy
+    networks: [proxy, app-backend]
+
+  app-db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${APP_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app"]
+      interval: 5s
+      retries: 10
+    volumes:
+      - app_db_data:/var/lib/postgresql/data
+    networks: [app-backend]
+
 networks:
   proxy:
   backend:
+  app-backend:
 
 volumes:
   caddy_data:
   portainer_data:
   nextcloud_data:
   db_data:
+  app_db_data:
   uptime-kuma:
     external: true
