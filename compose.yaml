@@ -50,7 +50,7 @@ services:
       - db_data:/var/lib/postgresql/data
     networks: [backend]
 
-  # ---- new in stage 3 ----
+  # ---- stage 3 ----
   visit-counter:
     image: ghcr.io/muller5258/visit-counter:latest
     restart: unless-stopped
@@ -76,10 +76,47 @@ services:
       - app_db_data:/var/lib/postgresql/data
     networks: [app-backend]
 
+  # ---- stage 4: monitoring ----
+  prometheus:
+    image: prom/prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks: [monitoring]
+
+  node-exporter:
+    image: prom/node-exporter
+    restart: unless-stopped
+    pid: host
+    command: --path.rootfs=/host
+    volumes:
+      - /:/host:ro,rslave
+    networks: [monitoring]
+
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.56.2
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks: [monitoring]
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks: [proxy, monitoring]
+
 networks:
   proxy:
   backend:
   app-backend:
+  monitoring:
 
 volumes:
   caddy_data:
@@ -87,5 +124,7 @@ volumes:
   nextcloud_data:
   db_data:
   app_db_data:
+  prometheus_data:
+  grafana_data:
   uptime-kuma:
     external: true
