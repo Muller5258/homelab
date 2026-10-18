@@ -1,17 +1,19 @@
-http://kuma.192.168.68.52.nip.io {
+http://kuma.192.168.68.52.nip.io, http://kuma.100.89.103.7.nip.io {
     reverse_proxy uptime-kuma:3001
 }
 
-http://portainer.192.168.68.52.nip.io {
+http://portainer.192.168.68.52.nip.io, http://portainer.100.89.103.7.nip.io {
     reverse_proxy portainer:9000
 }
 
-http://cloud.192.168.68.52.nip.io {
+http://cloud.192.168.68.52.nip.io, http://cloud.100.89.103.7.nip.io {
     reverse_proxy nextcloud:80
 }
-http://app.192.168.68.52.nip.io {
+
+http://app.192.168.68.52.nip.io, http://app.100.89.103.7.nip.io {
     reverse_proxy visit-counter:8000
 }
-http://grafana.192.168.68.52.nip.io {
+
+http://grafana.192.168.68.52.nip.io, http://grafana.100.89.103.7.nip.io {
     reverse_proxy grafana:3000
 }
