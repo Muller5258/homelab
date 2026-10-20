@@ -1,0 +1,12 @@
+[Unit]
+Description=Homelab backup
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=asaf
+ExecStartPre=/bin/sleep 120
+ExecStart=/home/asaf/homelab/backup.sh
+StandardOutput=append:/home/asaf/backups/backup.log
+StandardError=append:/home/asaf/backups/backup.log
